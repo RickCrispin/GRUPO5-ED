@@ -1,9 +1,44 @@
+// Commit: Se agregó la estructura Proceso y las variables globales necesarias para el gestor de procesos.
+// Integrante: Crispin Bendezu Rick Bernie
+
 #include <iostream>
 
 using namespace std;
 
+struct Proceso {
+	int id;
+	char nombre[30];
+	int prioridad;
+	Proceso* sig;
+};
+
+Proceso* cabeza = NULL;
+
 void insertarProceso() {
+   Proceso* nuevo = new Proceso;
    
+   cout<<"Ingrese ID del proceso: ";
+   cin>>nuevo->id;
+   
+   cout<<"Ingrese nombre del proceso: ";
+   cin.ignore();
+   cin.getline(nuevo->nombre, 30);
+   cout<<"Ingrese prioridad: ";
+   cin>>nuevo->prioridad;
+   nuevo->sig = NULL;
+   
+   if (cabeza == NULL){
+   		cabeza == nuevo;
+   }
+   else{
+   		Proceso* aux = cabeza;
+   		while (aux->sig != NULL){
+   			aux = aux->sig;
+		   }
+		   aux->sig = nuevo;
+	}
+	
+	cout<<"Proceso creado exitosamente."<<endl;
 }
 
 void eliminarProceso() {
