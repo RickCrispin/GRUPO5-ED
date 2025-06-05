@@ -1,8 +1,6 @@
-// Commit:Implementación completa con cola y prioridad
-// Integrante: Olarte Tuya Shadi Rashel Allegra 
-
+// Commit: En el codigo se agregó la función listarProcesos para mostrar la lista de todos los procesos existentes.
+// Integrante: Crispin Bendezu Rick Bernie
 #include <iostream>
-
 using namespace std;
 
 struct Proceso {
@@ -14,36 +12,28 @@ struct Proceso {
 
 Proceso* cabeza = NULL;
 
-
-// Variables globales para cola de CPU (por prioridad)
-Proceso* frenteCola = NULL;
-Proceso* finalCola = NULL;
-
-// Variables globales para pila de memoria
-Proceso* topePila = NULL;
-
 void insertarProceso() {
-   Proceso* nuevo = new Proceso;
+   Proceso* nuevo = new Proceso; // Reserva de memoria para el nuevo proceso
    
    cout<<"Ingrese ID del proceso: ";
    cin>>nuevo->id;
    
    cout<<"Ingrese nombre del proceso: ";
-   cin.ignore();
-   cin.getline(nuevo->nombre, 30);
+   cin.ignore(); // Limpiar el búfer de entrada
+   cin.getline(nuevo->nombre, 30); // Leer nombre con espacios
    cout<<"Ingrese prioridad: ";
    cin>>nuevo->prioridad;
-   nuevo->sig = NULL;
+   nuevo->sig = NULL; // El nuevo nodo apunta a NULL porque será el último
    
-   if (cabeza == NULL){
-   		cabeza = nuevo;
+   if (cabeza == NULL){ // Si la lista está vacía
+   		cabeza = nuevo; // El nuevo proceso se convierte en la cabeza
    }
    else{
-   		Proceso* aux = cabeza;
-   		while (aux->sig != NULL){
+   		Proceso* aux = cabeza; // Puntero auxiliar para recorrer la lista
+   		while (aux->sig != NULL){ // Recorrer hasta el último nodo
    			aux = aux->sig;
 		   }
-		   aux->sig = nuevo;
+		   aux->sig = nuevo; // Enlazar el nuevo nodo al final
 	}
 	
 	cout<<"Proceso creado exitosamente."<<endl;
@@ -51,8 +41,8 @@ void insertarProceso() {
 
 void eliminarProceso() {
     int id;
-    cout << "Ingrese ID del proceso a eliminar: ";
-    cin >> id;
+    cout<<"Ingrese ID del proceso a eliminar: ";
+    cin>>id;
 
     Proceso*actual=cabeza;//Puntero para recorrer la lista
     Proceso*anterior=NULL; //Puntero para guardar el espacio anterior
@@ -63,7 +53,7 @@ void eliminarProceso() {
         actual=actual->sig;//Avanzar al siguiente esapacio
     }
 
-    //Si no se encontr? el proceso
+    //Si no se encontra el proceso
     if (actual == NULL) {
         cout<<"Proceso no encontrado"<<endl;
         return;
@@ -83,34 +73,36 @@ void eliminarProceso() {
 
 
 void listarProcesos() {
-	
-   
+	Proceso* aux = cabeza; // Puntero auxiliar para recorrer la lista
+    if (aux == NULL) { // Si la lista está vacía
+        cout<<"No hay procesos registrados."<<endl;
+        return;
+    }
+    cout<<"=== LISTA DE PROCESOS ==="<<endl;
+    while (aux != NULL) { // Recorrer e imprimir cada proceso
+        cout<<"ID: "<<aux->id<<", Nombre: "<<aux->nombre<<", Prioridad: "<<aux->prioridad<<endl;
+        aux = aux->sig;
+    }
 }
 
 void modificarPrioridad() {
-	 int id, nuevaPrioridad;
-    cout << "Ingrese ID del proceso: ";
-    cin >> id;
-    
-    // Buscar el proceso por ID
-    Proceso* actual = cabeza;
-    while (actual != NULL && actual->id != id) {
-        actual = actual->sig;
-    }
-    
-    if (actual == NULL) {
-        cout << "Proceso no encontrado." << endl;
-        return;
-    }
-    
-    cout << "Prioridad actual: " << actual->prioridad << endl;
-    cout << "Ingrese nueva prioridad : ";
-    cin >> nuevaPrioridad;
-    
-    actual->prioridad = nuevaPrioridad;
-    cout << "Prioridad modificada exitosamente." << endl;
+	int id;
+    cout<<"Ingrese ID del proceso a modificar: ";
+    cin>>id;
 
-   
+    Proceso* aux = cabeza; // Puntero auxiliar para buscar el proceso
+    while (aux != NULL && aux->id != id) { // Buscar por ID
+        aux = aux->sig;
+    }
+
+    if (aux == NULL) { // Si no se encuentra
+        cout<<"Proceso no encontrado."<<endl;
+    } else {
+        cout<<"Prioridad actual: "<<aux->prioridad<<endl;
+        cout<<"Ingrese nueva prioridad: ";
+        cin>>aux->prioridad; // Actualizar prioridad
+        cout<<"Prioridad modificada correctamente."<<endl;
+    }
 }
 
 void GestorDeProcesos() {
@@ -149,77 +141,10 @@ void GestorDeProcesos() {
 }
 
 void encolarProceso() {
-	 int id;
-    cout << "Ingrese ID del proceso a encolar: ";
-    cin >> id;
-    
-    // Buscar el proceso en la lista principal
-    Proceso* buscar = cabeza;
-    while (buscar != NULL && buscar->id != id) {
-        buscar = buscar->sig;
-    }
-    
-    if (buscar == NULL) {
-        cout << "Proceso no encontrado en la lista." << endl;
-        return;
-    
-}
-    // Crear una copia del proceso para la cola
-    Proceso* nuevo = new Proceso;
-    nuevo->id = buscar->id;
-    strcpy(nuevo->nombre, buscar->nombre);  // Copiar el nombre del proceso
-    nuevo->prioridad = buscar->prioridad;
-    nuevo->sig = NULL;
-    
-    // Insertar en cola ordenada por prioridad (1 = menor número = mayor prioridad)
-    if (frenteCola == NULL) {
-        // Cola vacía - primer elemento
-        frenteCola = finalCola = nuevo;
-    } else if (nuevo->prioridad < frenteCola->prioridad) {
-        // Insertar al frente (menor número = mayor prioridad)
-        nuevo->sig = frenteCola;
-        frenteCola = nuevo;
-    } else {
-        // Buscar posición correcta manteniendo orden ascendente por prioridad
-        Proceso* actual = frenteCola;
-        while (actual->sig != NULL && actual->sig->prioridad < nuevo->prioridad) {
-            actual = actual->sig;
-        }
-        nuevo->sig = actual->sig;
-        actual->sig = nuevo;
-        
-        // Actualizar final si se insertó al final
-        if (nuevo->sig == NULL) {
-            finalCola = nuevo;
-        }
-    }
-    
-    cout << "Proceso encolado exitosamente." << endl;
+
 }
 
 void desencolarProceso() {
-	if (frenteCola == NULL) {
-        cout << "Cola vacía. No hay procesos para ejecutar." << endl;
-        return;
-    }
-    
-    Proceso* ejecutar = frenteCola;
-    cout << "Ejecutando proceso:" << endl;
-    cout << "ID: " << ejecutar->id << endl;
-    cout << "Nombre: " << ejecutar->nombre << endl;
-    cout << "Prioridad: " << ejecutar->prioridad << endl;
-    
-    // Remover de la cola (desencolado)
-    frenteCola = frenteCola->sig;
-    if (frenteCola == NULL) {
-        finalCola = NULL; // Cola quedó vacía
-    }
-    
-    delete ejecutar;
-    cout << "Proceso ejecutado y removido de la cola." << endl;
-}
-
-   
 }
 
 void mostrarCola() {
